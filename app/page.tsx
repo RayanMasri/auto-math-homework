@@ -1,113 +1,280 @@
-import Image from 'next/image'
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import calculateTextWidth from 'calculate-text-width';
+import html2canvas from 'html2canvas';
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const [state, setState] = useState<{
+		side: string;
+		right: { width: number; lines: number; table: boolean; tableWidth: number; tableHeight: number }[];
+		left: { width: number; lines: number; table: boolean; tableWidth: number; tableHeight: number }[];
+	}>({
+		side: 'right',
+		right: [],
+		left: [],
+	});
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const element = useRef(null);
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+	let dots = 'normal 16px Arial';
+	let question = 'normal 16px formata';
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+	const getDotsByWidth = (width: number) => {
+		if (width <= 0) return '';
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
+		return '.'.repeat(Math.floor(width / calculateTextWidth('.', dots)));
+	};
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+	const getQuestionWidth = (tag: string) => {
+		return calculateTextWidth(tag, question) + calculateTextWidth(' ', dots);
+	};
+
+	const parseQuestion = (index: number, width: number, lines: number) => {
+		if (lines < 1) return 'Failed';
+
+		return (
+			<div className="text-[#939598] text-[64px] font-['Arial'] text-right w-fit ">
+				{getDotsByWidth(width - getQuestionWidth(`(${index + 1}`))}&nbsp;<span className="text-black font-['formata']">{`(${index + 1}`}</span>
+				{new Array(lines - 1).fill(1).map((e) => {
+					return <div>{getDotsByWidth(width)}</div>;
+				})}
+			</div>
+		);
+	};
+
+	useEffect(() => {
+		setState(JSON.parse(localStorage.getItem('jabada') || '{"side":"right","right":[],"left":[]}'));
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem('jabada', JSON.stringify(state));
+	}, [state]);
+
+	return (
+		<div className='w-full h-full fixed top-0 left-0 flex'>
+			<button
+				onClick={() => {
+					console.log(element.current);
+					html2canvas(element.current, {
+						width: 2380,
+						height: 3368,
+						scale: 1,
+					}).then((canvas) => {
+						let url = canvas.toDataURL();
+						console.log(url);
+						// window.location.href = url;
+					});
+				}}
+			>
+				Download
+			</button>
+			<div className='w-full h-full flex justify-center items-center flex-row'>
+				<div className={`w-[2380px] h-[3368px] bg-white box-border`} ref={element}>
+					<div className="text-black text-[128px] text-right flex items-center justify-end font-['manal']">اختبار منتصف الفصل - الفصل 1</div>
+					<div className='w-full bg-black h-[8px] mt-16'>&nbsp;</div>
+					<div className='w-full h-auto flex flex-row'>
+						<div className='w-[1190px] box-border p-8 flex flex-col justify-start items-end gap-y-12'>
+							{state.left.map((question, index) => {
+								return (
+									<div className='w-fit flex flex-row gap-x-8'>
+										<div className='mt-16'>
+											{question.table ? (
+												<svg width='420' height='420' viewBox='0 0 420 420'>
+													{new Array(question.tableWidth + 1).fill(1).map((_, index) => {
+														let y = (420 / question.tableWidth) * index;
+
+														return <line x1='0' y1={y} x2='420' y2={y} stroke='gray' />;
+													})}
+													{new Array(question.tableHeight + 1).fill(1).map((_, index) => {
+														let x = (420 / question.tableHeight) * index;
+
+														return <line x1={x} y1='0' x2={x} y2='420' stroke='gray' />;
+													})}
+
+													<line x1='210' y1='0' x2='210' y2='420' strokeWidth='2' stroke='black' />
+													<line y1='210' x1='0' y2='210' x2='420' strokeWidth='2' stroke='black' />
+													<line x1='210' y1='0' x2='210' y2='420' stroke='black' />
+
+													<line x1='0' y1='0' x2='420' y2='0' stroke='gray' />
+													<line x1='0' y1='0' x2='0' y2='420' stroke='gray' />
+													<line x1='420' y1='0' x2='420' y2='420' stroke='gray' />
+													<line x1='420' y1='420' x2='0' y2='420' stroke='gray' />
+												</svg>
+											) : (
+												''
+											)}
+										</div>
+										{parseQuestion(index + state.right.length, question.width - (question.table ? 110 : 0), question.lines)}
+									</div>
+								);
+							})}
+						</div>
+						<div className='w-[1190px] box-border p-8 flex flex-col justify-start items-end gap-y-12'>
+							{state.right.map((question, index) => {
+								return (
+									<div className='w-fit flex flex-row gap-x-8'>
+										<div className='mt-16'>
+											{question.table ? (
+												<svg width='420' height='420' viewBox='0 0 420 420'>
+													{new Array(question.tableWidth + 1).fill(1).map((_, index) => {
+														let y = (420 / question.tableWidth) * index;
+
+														return <line x1='0' y1={y} x2='420' y2={y} stroke='gray' />;
+													})}
+													{new Array(question.tableHeight + 1).fill(1).map((_, index) => {
+														let x = (420 / question.tableHeight) * index;
+
+														return <line x1={x} y1='0' x2={x} y2='420' stroke='gray' />;
+													})}
+
+													<line x1='210' y1='0' x2='210' y2='420' strokeWidth='2' stroke='black' />
+													<line y1='210' x1='0' y2='210' x2='420' strokeWidth='2' stroke='black' />
+													<line x1='210' y1='0' x2='210' y2='420' stroke='black' />
+
+													<line x1='0' y1='0' x2='420' y2='0' stroke='gray' />
+													<line x1='0' y1='0' x2='0' y2='420' stroke='gray' />
+													<line x1='420' y1='0' x2='420' y2='420' stroke='gray' />
+													<line x1='420' y1='420' x2='0' y2='420' stroke='gray' />
+												</svg>
+											) : (
+												''
+											)}
+										</div>
+										{parseQuestion(index, question.width - (question.table ? 110 : 0), question.lines)}
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</div>
+				<div className='ml-12 w-[600px] py-10 h-full'>
+					<div className='w-full flex flex-row gap-x-8 justify-center items-center'>
+						<div
+							className={`bg-gray-400 w-[100px] text-center rounded p-2 text-[24px] hover:opacity-50 transition-all ${state.side == 'left' ? 'bg-gray-600' : 'bg-gray-400'}`}
+							onClick={() => setState({ ...state, side: 'left' })}
+						>
+							Left
+						</div>
+						<div
+							className={`bg-gray-400 w-[100px] text-center rounded p-2 text-[24px] hover:opacity-50 transition-all ${state.side == 'right' ? 'bg-gray-600' : 'bg-gray-400'}`}
+							onClick={() => setState({ ...state, side: 'right' })}
+						>
+							Right
+						</div>
+					</div>
+
+					<div className='w-full flex flex-col pt-2 overflow-scroll h-full'>
+						{state[state.side].map((question, index) => {
+							let side = state.side;
+							return (
+								<div className='w-full border-gray-400 border-dashed border-2 p-2 mb-2 flex flex-col'>
+									<div className='flex flex-row'>
+										<div>{index}</div>
+										<div className='mx-2'>-</div>
+										<div>Width:</div>&nbsp;
+										<input
+											type='text'
+											value={question.width}
+											className='bg-transparent w-[210px] border-b-gray-400 border-b-2 outline-none text-white'
+											onChange={(event) => {
+												let edited = [...state[side]];
+
+												let value = parseInt(event.target.value);
+												edited[index].width = value > 0 ? value : 1;
+												setState({
+													...state,
+													[side]: edited,
+												});
+											}}
+										/>
+										<div className='mx-2'>-</div>
+										<div>Lines:</div>&nbsp;
+										<input
+											type='text'
+											value={question.lines}
+											className='bg-transparent w-[210px] border-b-gray-400 border-b-2 outline-none text-white'
+											onChange={(event) => {
+												let edited = [...state[side]];
+
+												let value = parseInt(event.target.value);
+												edited[index].lines = value > 0 ? value : 1;
+												setState({
+													...state,
+													[side]: edited,
+												});
+											}}
+										/>
+									</div>
+									<div className='flex flex-row'>
+										<div>Table:</div>&nbsp;
+										<input
+											type='radio'
+											value={question.table}
+											className='bg-transparent w-fit border-b-gray-400 border-b-2 outline-none text-white'
+											onChange={() => {}}
+											onClick={(event) => {
+												let edited = [...state[side]];
+												edited[index].table = !edited[index].table;
+												setState({
+													...state,
+													[side]: edited,
+												});
+											}}
+										/>
+										<div className='mx-2'>-</div>
+										<div>Width:</div>&nbsp;
+										<input
+											type='text'
+											value={question.tableWidth}
+											className='bg-transparent w-[150px] border-b-gray-400 border-b-2 outline-none text-white'
+											onChange={(event) => {
+												let edited = [...state[side]];
+
+												let value = parseInt(event.target.value);
+												edited[index].tableWidth = value > 0 ? value : 1;
+												setState({
+													...state,
+													[side]: edited,
+												});
+											}}
+										/>
+										<div className='mx-2'>-</div>
+										<div>Height:</div>&nbsp;
+										<input
+											type='text'
+											value={question.tableHeight}
+											className='bg-transparent w-[150px] border-b-gray-400 border-b-2 outline-none text-white'
+											onChange={(event) => {
+												let edited = [...state[side]];
+
+												let value = parseInt(event.target.value);
+												edited[index].tableHeight = value > 0 ? value : 1;
+												setState({
+													...state,
+													[side]: edited,
+												});
+											}}
+										/>
+									</div>
+								</div>
+							);
+						})}
+						<div className='w-full flex justify-center items-center pt-5'>
+							<div
+								className='text-white bg-gray-500 rounded flex justify-center items-center w-[50px] h-[50px] pb-1 text-[40px] hover:opacity-50 transition-all'
+								onClick={() => {
+									setState({
+										...state,
+										[state.side]: state[state.side].concat([{ width: 275, lines: 1, table: false, tableWidth: 0, tableHeight: 0 }]),
+									});
+								}}
+							>
+								+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }
